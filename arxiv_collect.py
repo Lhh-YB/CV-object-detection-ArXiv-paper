@@ -2,6 +2,10 @@ import arxiv
 from datetime import datetime, timedelta
 import os
 import argparse
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 
 def main(start_date, end_date, catalog, order):
@@ -18,7 +22,7 @@ def main(start_date, end_date, catalog, order):
     )
 
     search = arxiv.Search(
-        query="cat:{}".format(catalog),
+        query=f"cat:{catalog} AND ti:Objection Detection",  # 添加标题筛选条件
         max_results=float("inf"),
         sort_by=arxiv.SortCriterion.SubmittedDate,
         sort_order=sort_order,
@@ -97,7 +101,7 @@ def write_to_md(buffer):
 
     for result in buffer:
         if os.path.exists(md_file_path):
-            with open(md_file_path, "r") as f:
+            with open(md_file_path, "r", encoding='utf-8') as f:
                 md_content = f.read()
         else:
             md_content = f"# Arxiv Papers in cs.CV on {result.published.date()}\n"
@@ -129,7 +133,7 @@ def write_to_md(buffer):
         md_content += "- **Summary**: {}\n".format(result.summary.replace("\n", " "))
         md_content += "\n\n\n"
 
-        with open(md_file_path, "w") as f:
+        with open(md_file_path, "w", encoding='utf-8') as f:
             f.write(md_content)
 
     # Clear Buffer
